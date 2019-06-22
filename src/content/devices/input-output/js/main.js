@@ -34,7 +34,7 @@ function gotDevices(deviceInfos) {
     } else if (deviceInfo.kind === 'audiooutput') {
       option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
       audioOutputSelect.appendChild(option);
-    } else if (deviceInfo.kind === 'videoinput') {
+    } else if (deviceInfo.kind === 'videoinput' && deviceInfo.label.indexOf('SSPZCam')>=0) {
       option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
       videoSelect.appendChild(option);
     } else {
@@ -90,6 +90,7 @@ function handleError(error) {
 function start() {
   if (window.stream) {
     window.stream.getTracks().forEach(track => {
+      console.log("wxh:"+track.getSettings().width+"x"+track.getSettings().height);
       track.stop();
     });
   }
@@ -97,7 +98,7 @@ function start() {
   const videoSource = videoSelect.value;
   const constraints = {
     audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
-    video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+    video: {width: {exact: 2880}, height: {exact: 2880},deviceId: videoSource ? {exact: videoSource} : undefined}
   };
   navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
 }
