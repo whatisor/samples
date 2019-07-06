@@ -97,15 +97,15 @@ function start() {
   const audioSource = audioInputSelect.value;
   const videoSource = videoSelect.value;
   const constraints = {
-    audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
-    video: {width: {exact: 2880}, height: {exact: 2880},deviceId: videoSource ? {exact: videoSource} : undefined}
+    //audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
+    video: {deviceId: videoSource ? {exact: videoSource} : undefined}
   };
   navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
 }
 
-audioInputSelect.onchange = start;
-audioOutputSelect.onchange = changeAudioDestination;
+//audioInputSelect.onchange = start;
+//audioOutputSelect.onchange = changeAudioDestination;
 
 videoSelect.onchange = start;
 
-start();
+//start();
