@@ -8,59 +8,65 @@ var server = app.listen(80, "", function() {
 
     console.log('Listening at http://%s:%s', host, port);
 });
-
+return;
+//
+//
+//
+//
+//
+//
+//
+//
+//setup stream binary
+var streamPath = "E:/Data/git/2019/ZCamK1Pro/x64/Release";
 var os = require('os');
 const exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
-var child = null;
-app.get('/stereo', function(req, res, next) {
-    if (child) {
-    	console.log(child.pid);
-        exec("taskkill /pid "+child.pid+ '/F /T');
-        child = null;
+var child1 = null;
+var child2 = null;
+let opts = {
+    "cwd": streamPath,
+};
+var commands = "SSPZCamTest.exe 10.98.32.1 10.98.32.2 3"; //STEREO
+child1 = exec(commands, opts, function(error, stdout, stderr) {
+    if (error) {
+        console.error(error);
+        return;
     }
-    let opts = {
-        "cwd": "E:/Data/git/2019/ZCamK1Pro/x64/Release",
-    };
-    var commands = "SSPZCamTest.exe 10.98.32.1 10.98.32.2 2"; //STEREO
-    child = exec(commands, opts, function(error, stdout, stderr) {
-        if (error) {
-            console.error(error);
-            return;
-        }
-        console.log(stdout);
-    })
-    res.json("OK");
+    console.log(stdout);
 })
 
-
-app.get('/non-stereo', function(req, res, next) {
-
-    if (child) {
-    	console.log(child.pid);
-        exec("taskkill /pid "+child.pid+ '/F /T');
-        child = null;
+let opts = {
+    "cwd": streamPath,
+};
+var commands = "SSPZCamTest.exe 10.98.32.1 10.98.32.2 2"; //NON-STEREO
+child2 = exec(commands, opts, function(error, stdout, stderr) {
+    if (error) {
+        console.error(error);
+        return;
     }
-    let opts = {
-        "cwd": "E:/Data/git/2019/ZCamK1Pro/x64/Release",
-    };
-    var commands = "SSPZCamTest.exe 10.98.32.1 10.98.32.2 3"; //STEREO
-    child = exec(commands, opts, function(error, stdout, stderr) {
-    	 if (error) {
-            console.error(error);
-            return;
-        }
-        console.log(stdout);
+    console.log(stdout);
 
-    })
-    res.json("OK");
 })
 
 process.on('SIGINT', function() {
+    killChild(child1);
+    killChild(child2);
+
+    process.exit();
+});
+
+function killChild(child) {
     if (child) {
-    	console.log(child.pid);
-        exec("taskkill /pid "+child.pid+ '/F /T');
+        console.log(child.pid);
+        exec("taskkill /PID " + child.pid + ' /F /T', { shell: true }, function(error, stdout, stderr) {
+            if (error) {
+                console.error(error);
+                return;
+            }
+            console.log(stdout);
+
+        });
         child = null;
     }
-        process.exit();
-});
+}

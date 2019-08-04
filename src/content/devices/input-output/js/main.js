@@ -1,10 +1,10 @@
 /*
-*  Copyright (c) 2015 The WebRTC project authors. All Rights Reserved.
-*
-*  Use of this source code is governed by a BSD-style license
-*  that can be found in the LICENSE file in the root of the source
-*  tree.
-*/
+ *  Copyright (c) 2015 The WebRTC project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree.
+ */
 
 'use strict';
 
@@ -17,125 +17,117 @@ const selectors = [audioInputSelect, audioOutputSelect, videoSelect];
 audioOutputSelect.disabled = !('sinkId' in HTMLMediaElement.prototype);
 
 function gotDevices(deviceInfos) {
-  // Handles being called several times to update labels. Preserve values.
-  const values = selectors.map(select => select.value);
-  selectors.forEach(select => {
-    while (select.firstChild) {
-      select.removeChild(select.firstChild);
+    // Handles being called several times to update labels. Preserve values.
+    const values = selectors.map(select => select.value);
+    selectors.forEach(select => {
+        while (select.firstChild) {
+            select.removeChild(select.firstChild);
+        }
+    });
+    for (let i = 0; i !== deviceInfos.length; ++i) {
+        const deviceInfo = deviceInfos[i];
+        const option = document.createElement('option');
+        option.value = deviceInfo.deviceId;
+        if (deviceInfo.kind === 'audioinput') {
+            option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
+            audioInputSelect.appendChild(option);
+        } else if (deviceInfo.kind === 'audiooutput') {
+            option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
+            audioOutputSelect.appendChild(option);
+        } else if (deviceInfo.kind === 'videoinput' && deviceInfo.label.indexOf('SSPZCam') >= 0) {
+            option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
+            videoSelect.appendChild(option);
+        } else {
+            console.log('Some other kind of source/device: ', deviceInfo);
+        }
     }
-  });
-  for (let i = 0; i !== deviceInfos.length; ++i) {
-    const deviceInfo = deviceInfos[i];
-    const option = document.createElement('option');
-    option.value = deviceInfo.deviceId;
-    if (deviceInfo.kind === 'audioinput') {
-      option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
-      audioInputSelect.appendChild(option);
-    } else if (deviceInfo.kind === 'audiooutput') {
-      option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
-      audioOutputSelect.appendChild(option);
-    } else if (deviceInfo.kind === 'videoinput' && deviceInfo.label.indexOf('SSPZCam')>=0) {
-      option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
-      videoSelect.appendChild(option);
-    } else {
-      console.log('Some other kind of source/device: ', deviceInfo);
-    }
-  }
-  selectors.forEach((select, selectorIndex) => {
-    if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
-      select.value = values[selectorIndex];
-    }
-  });
+    selectors.forEach((select, selectorIndex) => {
+        if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+            select.value = values[selectorIndex];
+        }
+    });
 }
 
 navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
 // Attach audio output device to video element using device/sink ID.
 function attachSinkId(element, sinkId) {
-  if (typeof element.sinkId !== 'undefined') {
-    element.setSinkId(sinkId)
-      .then(() => {
-        console.log(`Success, audio output device attached: ${sinkId}`);
-      })
-      .catch(error => {
-        let errorMessage = error;
-        if (error.name === 'SecurityError') {
-          errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
-        }
-        console.error(errorMessage);
-        // Jump back to first output device in the list as it's the default.
-        audioOutputSelect.selectedIndex = 0;
-      });
-  } else {
-    console.warn('Browser does not support output device selection.');
-  }
+    if (typeof element.sinkId !== 'undefined') {
+        element.setSinkId(sinkId)
+            .then(() => {
+                console.log(`Success, audio output device attached: ${sinkId}`);
+            })
+            .catch(error => {
+                let errorMessage = error;
+                if (error.name === 'SecurityError') {
+                    errorMessage = `You need to use HTTPS for selecting audio output device: ${error}`;
+                }
+                console.error(errorMessage);
+                // Jump back to first output device in the list as it's the default.
+                audioOutputSelect.selectedIndex = 0;
+            });
+    } else {
+        console.warn('Browser does not support output device selection.');
+    }
 }
 
 function changeAudioDestination() {
-  const audioDestination = audioOutputSelect.value;
-  attachSinkId(videoElement, audioDestination);
+    const audioDestination = audioOutputSelect.value;
+    attachSinkId(videoElement, audioDestination);
 }
 
 function gotStream(stream) {
-  window.stream = stream; // make stream available to console
-  videoElement.srcObject = stream;
-  document.getElementById('preview').srcObject = stream;
-  // Refresh button list in case labels have become available
-  return navigator.mediaDevices.enumerateDevices();
+    window.stream = stream; // make stream available to console
+    videoElement.srcObject = stream;
+    document.getElementById('preview').srcObject = stream;
+    // Refresh button list in case labels have become available
+    return navigator.mediaDevices.enumerateDevices();
 }
 
 function handleError(error) {
-  console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+    console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
 }
 
 var currentStatus = null;
+
 function start() {
 
-var selected = videoSelect.options[videoSelect.selectedIndex].innerText;
-//control server
-if(selected.indexOf("Stereo")>=0){
-
-  if(currentStatus !== "Stereo")
-    queryGET("/stereo");
-  currentStatus = "Stereo";
-}else{
-  if(currentStatus === "Stereo")
-    queryGET("/non-stereo");
-  currentStatus = "non-Stereo";
+    var selected = videoSelect.options[videoSelect.selectedIndex].innerText;
+   openStream(selected);
 }
 
-  if (window.stream) {
-    window.stream.getTracks().forEach(track => {
-      console.log("wxh:"+track.getSettings().width+"x"+track.getSettings().height);
-      track.stop();
-    });
-  }
-  const audioSource = audioInputSelect.value;
-  const videoSource = videoSelect.value;
-  const constraints = {
-   // video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: 2120}, height: {exact: 1248}} //NON-STEREO
-    video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: selected.indexOf("Stereo")>=0?2120*2:2120}, height: {exact: 1248}}  //STEREO
-  };
-  navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
+function openStream(selected) {
+    if (window.stream) {
+        window.stream.getTracks().forEach(track => {
+            console.log("wxh:" + track.getSettings().width + "x" + track.getSettings().height);
+            track.stop();
+        });
+    }
+    const audioSource = audioInputSelect.value;
+    const videoSource = videoSelect.value;
+    const constraints = {
+        // video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: 2120}, height: {exact: 1248}} //NON-STEREO
+        video: { deviceId: videoSource ? { exact: videoSource } : undefined, width: { exact: (selected.indexOf("Stereo") >= 0 ? 2120 * 2 : 2120) }, height: { exact: 1248 } } //STEREO
+    };
+    navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
 }
-
-//audioInputSelect.onchange = start;
-//audioOutputSelect.onchange = changeAudioDestination;
 
 videoSelect.onchange = start;
 
 //start();
 
 
-function queryGET(url){
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', url);
-  xhr.onload = function() {
-      if (xhr.status === 200) {
-      }
-      else {
-          alert('Request failed.  Returned status of ' + xhr.status);
-      }
-  };
-  xhr.send();
+function queryGET(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            callback();
+        } else {
+            alert('Request failed.  Returned status of ' + xhr.status);
+
+            callback();
+        }
+    };
+    xhr.send();
 }
