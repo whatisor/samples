@@ -79,6 +79,7 @@ function changeAudioDestination() {
 function gotStream(stream) {
   window.stream = stream; // make stream available to console
   videoElement.srcObject = stream;
+  document.getElementById('preview').srcObject = stream;
   // Refresh button list in case labels have become available
   return navigator.mediaDevices.enumerateDevices();
 }
@@ -87,7 +88,22 @@ function handleError(error) {
   console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
 }
 
+var currentStatus = null;
 function start() {
+
+var selected = videoSelect.options[videoSelect.selectedIndex].innerText;
+//control server
+if(selected.indexOf("Stereo")>=0){
+
+  if(currentStatus !== "Stereo")
+    queryGET("/stereo");
+  currentStatus = "Stereo";
+}else{
+  if(currentStatus === "Stereo")
+    queryGET("/non-stereo");
+  currentStatus = "non-Stereo";
+}
+
   if (window.stream) {
     window.stream.getTracks().forEach(track => {
       console.log("wxh:"+track.getSettings().width+"x"+track.getSettings().height);
@@ -97,8 +113,8 @@ function start() {
   const audioSource = audioInputSelect.value;
   const videoSource = videoSelect.value;
   const constraints = {
-    //audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
-    video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+   // video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: 2120}, height: {exact: 1248}} //NON-STEREO
+    video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: selected.indexOf("Stereo")>=0?2120*2:2120}, height: {exact: 1248}}  //STEREO
   };
   navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
 }
@@ -109,3 +125,17 @@ function start() {
 videoSelect.onchange = start;
 
 //start();
+
+
+function queryGET(url){
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url);
+  xhr.onload = function() {
+      if (xhr.status === 200) {
+      }
+      else {
+          alert('Request failed.  Returned status of ' + xhr.status);
+      }
+  };
+  xhr.send();
+}

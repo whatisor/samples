@@ -40,6 +40,13 @@
             width: 12em;
             display: inline-block;
         }
+        #preview{
+            max-width: 640px;
+            max-height:640px;
+            position: absolute;
+            top:200px;
+            left:0;
+        }
     </style>
 
 </head>
@@ -64,8 +71,8 @@
     <div class="select">
         <label for="videoSource">Video source: </label><select id="videoSource"></select>
     </div>
-
     <video id="video" playsinline autoplay></video>
+    <video id="preview" playsinline autoplay title="Preview" ></video>
 
     <p class="small"><b>Note:</b> If you hear a reverb sound your microphone is picking up the output of your
         speakers/headset, lower the volume and/or move the microphone further away from your speakers/headset.</p>
