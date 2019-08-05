@@ -36,10 +36,10 @@ child1 = exec(commands, opts, function(error, stdout, stderr) {
     console.log(stdout);
 })
 
-let opts = {
+ opts = {
     "cwd": streamPath,
 };
-var commands = "SSPZCamTest.exe 10.98.32.1 10.98.32.2 2"; //NON-STEREO
+ commands = "SSPZCamTest.exe 10.98.32.1 10.98.32.2 2"; //NON-STEREO
 child2 = exec(commands, opts, function(error, stdout, stderr) {
     if (error) {
         console.error(error);
