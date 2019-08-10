@@ -114,7 +114,7 @@ if(selected.indexOf("Stereo")>=0){
   const videoSource = videoSelect.value;
   const constraints = {
    // video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: 2120}, height: {exact: 1248}} //NON-STEREO
-    video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: selected.indexOf("Stereo")>=0?2120*2:2120}, height: {exact: 1248}}  //STEREO
+    video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: selected.indexOf("Stereo")>=0?2880*2:2880}, height: {exact: 2880}}  //STEREO
   };
   navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
 }
