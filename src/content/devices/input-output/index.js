@@ -8,7 +8,7 @@ var server = app.listen(80, "", function() {
 
     console.log('Listening at http://%s:%s', host, port);
 });
-
+return;
 var os = require('os');
 const exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
