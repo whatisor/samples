@@ -34,7 +34,7 @@ function gotDevices(deviceInfos) {
     } else if (deviceInfo.kind === 'audiooutput') {
       option.text = deviceInfo.label || `speaker ${audioOutputSelect.length + 1}`;
       audioOutputSelect.appendChild(option);
-    } else if (deviceInfo.kind === 'videoinput' && deviceInfo.label.indexOf('SSPZCam')>=0) {
+    } else if (deviceInfo.kind === 'videoinput') {
       option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
       videoSelect.appendChild(option);
     } else {
@@ -96,11 +96,11 @@ var selected = videoSelect.options[videoSelect.selectedIndex].innerText;
 if(selected.indexOf("Stereo")>=0){
 
   if(currentStatus !== "Stereo")
-    queryGET("/stereo");
+    ;//queryGET("/stereo");
   currentStatus = "Stereo";
 }else{
   if(currentStatus === "Stereo")
-    queryGET("/non-stereo");
+    ;//queryGET("/non-stereo");
   currentStatus = "non-Stereo";
 }
 
@@ -113,8 +113,8 @@ if(selected.indexOf("Stereo")>=0){
   const audioSource = audioInputSelect.value;
   const videoSource = videoSelect.value;
   const constraints = {
-   // video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: 2120}, height: {exact: 1248}} //NON-STEREO
-    video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: selected.indexOf("Stereo")>=0?2880*2:2880}, height: {exact: 2880}}  //STEREO
+    video: {deviceId: videoSource ? {exact: videoSource} : undefined,width: {exact: 2048*2}, height: {exact: 2048}} //NON-STEREO
+    //video: {deviceId: videoSource ? {exact: videoSource} : undefined}  //STEREO
   };
   navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
 }
